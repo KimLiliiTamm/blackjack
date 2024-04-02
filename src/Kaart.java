@@ -20,4 +20,8 @@ public class Kaart {
     public int getSekundaarneVäärtus() {
         return sekundaarneVäärtus;
     }
+
+    public String toString() {
+        return tähis;
+    }
 }
