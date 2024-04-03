@@ -106,28 +106,54 @@ public class Main {
         System.out.println("Diileri kaardid: " + dealer.getKaardid());
         System.out.println("Mängija kaardid: " + player.getKaardid() + ", summa: " + player.getKaartideSumma());
 
-        boolean kasMängJätkub = true;
-        int mängijaleJagatudKaartideArv = 2;
-        while (kasMängJätkub) {
+        while (true) {
 
-            String sisestatakse = JOptionPane.showInputDialog(null, "Sisesta 'HIT' või 'STAND'", "Andmete sisestamine",
+            String sisestatakse = JOptionPane.showInputDialog(null, "Sisesta 'HIT' või 'STAND'", "Otsus",
                     JOptionPane.QUESTION_MESSAGE);
 
             if (sisestatakse.toLowerCase().equals("hit")) {
                 System.out.println("hit");
-                break;
+                jagaKaart(player, kaardipakk);
+                if (player.getKaartideSumma() > 21) {
+                    System.out.println("Mängija kaotas");
+                    break;
+                }
+                else if (dealer.getKaartideSumma() < 17) {
+                    jagaKaart(dealer, kaardipakk);
+                    if (dealer.getKaartideSumma() > 21) {
+                        System.out.println("Diiler kaotas");
+                        break;
+                    }
+                }
             }
+            
             else if (sisestatakse.toLowerCase().equals("stand")) {
                 System.out.println("stand");
                 if (dealer.getKaartideSumma() < 17) {
                     jagaKaart(dealer, kaardipakk);
+                    if (dealer.getKaartideSumma() > 21) {
+                        System.out.println("Diiler kaotas");
+                        break;
+                    }
+                }
+                else {
+                    if (dealer.getKaartideSumma() > player.getKaartideSumma()) {
+                        System.out.println("Diiler võitis");
+                    } 
+                    else if (player.getKaartideSumma() > dealer.getKaartideSumma()) {
+                        System.out.println("Mängija võitis");
+                    }
+                    else {
+                        System.out.println("Viik");
+                    }
+                    break;
                 }
             }
+            
             else {
                 System.out.println("Sisestasid valesti, lõpp");
                 break;
             }
-            mängijaleJagatudKaartideArv++;
         }
     }
 }
