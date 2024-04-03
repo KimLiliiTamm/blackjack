@@ -1,5 +1,6 @@
 import java.util.List;
 import java.util.ArrayList;
+import javax.swing.JOptionPane;
 
 public class Main {
 
@@ -16,8 +17,6 @@ public class Main {
         List<Kaart> kaardid = new ArrayList<>();
         String[] tükid = kaartideKogu.split(",");
 
-
-        // ARVUTAB VALESTI, POLE VIGA LAHENDANUD
         int j = 2;
         int primaarneVäärtus;
         int sekundaarneVäärtus = 0;
@@ -27,7 +26,7 @@ public class Main {
             if (j==14) {
                 primaarneVäärtus = 11;
                 sekundaarneVäärtus = 1;
-                j = 2;
+                j = 1;
             }
 
             // Pildiga kaart
@@ -38,12 +37,33 @@ public class Main {
             else
                 primaarneVäärtus = j;
 
-            Kaart kaart = new Kaart(tükid[i], primaarneVäärtus, sekundaarneVäärtus);
+            Kaart kaart = new Kaart(tükid[i], primaarneVäärtus, sekundaarneVäärtus, false);
             kaardid.add(kaart);
             sekundaarneVäärtus = 0;
         }
 
         return kaardid;
+    }
+
+    /**
+     * Üldine kaardi jagamise meetod
+     * @param mängija Player isend, kellele kaart jagatakse
+     * @param kaardipakk Kaardipakk, millest kaart jagatakse
+     */
+    public static void jagaKaart(Player mängija, List<Kaart> kaardipakk) {
+        int suvalineArv = (int)(Math.random() * kaardipakk.size());
+        Kaart kaart = kaardipakk.get(suvalineArv);
+        mängija.lisaKaart(kaart);
+        int väärtus = kaart.getPrimaarneVäärtus();
+        if (väärtus != 11)
+            mängija.lisaVäärtus(väärtus);
+        else {
+            if (mängija.getKaartideSumma() + väärtus > 21)
+                mängija.lisaVäärtus(1);
+            else
+                mängija.lisaVäärtus(väärtus);
+        }
+        kaardipakk.remove(suvalineArv);
     }
 
     public static void main(String[] args) {
@@ -62,28 +82,52 @@ public class Main {
             // Kordamööda kaartide jagamine ning jagatud kaardi eemaldamine kaardipakist
             if (i % 2 == 0) {
                 player.lisaKaart(kaart);
-                player.lisaVäärtus(kaart.getPrimaarneVäärtus());
+                // Juhul, kui peaks saama kaks ässa
+                if (dealer.getKaartideSumma() + kaart.getPrimaarneVäärtus() > 21)
+                    dealer.lisaVäärtus(kaart.getSekundaarneVäärtus());
+                else
+                    dealer.lisaVäärtus(kaart.getPrimaarneVäärtus());
                 kaardipakk.remove(suvalineArv);
             }
 
             else {
+                if (i==3)
+                    kaart.kasOnPeidetud = true;
                 dealer.lisaKaart(kaart);
-                dealer.lisaVäärtus(kaart.getPrimaarneVäärtus());
+                // Juhul, kui peaks saama kaks ässa
+                if (dealer.getKaartideSumma() + kaart.getPrimaarneVäärtus() > 21)
+                    dealer.lisaVäärtus(kaart.getSekundaarneVäärtus());
+                else
+                    dealer.lisaVäärtus(kaart.getPrimaarneVäärtus());
                 kaardipakk.remove(suvalineArv);
             }
         }
 
-        System.out.println("Diileri kaardid: " + dealer.getKaardid() + ", summa: " + dealer.getKaartideSumma());
+        System.out.println("Diileri kaardid: " + dealer.getKaardid());
         System.out.println("Mängija kaardid: " + player.getKaardid() + ", summa: " + player.getKaartideSumma());
 
-        // Siia peaks lisama ka võimaluse mäng lõpetada
-        // TODO
-
-        /*
         boolean kasMängJätkub = true;
+        int mängijaleJagatudKaartideArv = 2;
         while (kasMängJätkub) {
-        }
 
-         */
+            String sisestatakse = JOptionPane.showInputDialog(null, "Sisesta 'HIT' või 'STAND'", "Andmete sisestamine",
+                    JOptionPane.QUESTION_MESSAGE);
+
+            if (sisestatakse.toLowerCase().equals("hit")) {
+                System.out.println("hit");
+                break;
+            }
+            else if (sisestatakse.toLowerCase().equals("stand")) {
+                System.out.println("stand");
+                if (dealer.getKaartideSumma() < 17) {
+                    jagaKaart(dealer, kaardipakk);
+                }
+            }
+            else {
+                System.out.println("Sisestasid valesti, lõpp");
+                break;
+            }
+            mängijaleJagatudKaartideArv++;
+        }
     }
 }
